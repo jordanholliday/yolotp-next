@@ -86,7 +86,7 @@ async function POST(req: NextRequest) {
 async function DELETE() {
 	const session = await getIronSession(cookies(), sessionOptions);
 	session.destroy();
-	return Response.json({ success: true });
+	return NextResponse.json({ success: true });
 }
 
 export const yolotpApiHandlers = { GET, POST, DELETE };
