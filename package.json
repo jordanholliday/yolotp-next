@@ -1,35 +1,39 @@
 {
   "name": "@yolotp/next",
   "type": "module",
-  "source": "src/index.ts",
   "exports": {
-    "require": "./dist/index.cjs",
-    "default": "./dist/index.modern.js"
+    "./server": {
+      "import": "./dist/es/server.js",
+      "require": "./dist/cjs/server.js",
+      "types": "./dist/es/server.d.ts"
+    },
+    "./client": {
+      "import": "./dist/es/client.js",
+      "require": "./dist/cjs/client.js",
+      "types": "./dist/es/client.d.ts"
+    }
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.module.js",
-  "unpkg": "./dist/index.umd.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "microbundle",
-    "dev": "microbundle watch"
-  },
-  "files": [
-    "dist"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/jordanholliday/yolotp-next"
   },
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Next utils for Yolotp one-time password auth",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist/ && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc -outDir dist/es",
+    "build:cjs": "tsc --module CommonJS --outDir dist/cjs"
+  },
   "author": "Yolotp",
   "license": "MIT",
   "devDependencies": {
+    "@types/cookie": "^0.6.0",
     "@types/node": "^20.11.17",
     "@types/react": "^18.2.55",
-    "@types/react-dom": "^18.2.19",
-    "microbundle": "^0.15.1"
+    "@types/react-dom": "^18.2.19"
   },
   "peerDependencies": {
     "next": "^14.1.0",
