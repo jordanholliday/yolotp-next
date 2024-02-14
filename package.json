@@ -1,6 +1,5 @@
 {
   "name": "@yolotp/next",
-  "type": "module",
   "exports": {
     "./server": {
       "import": "./dist/es/server.js",
@@ -17,7 +16,7 @@
     "type": "git",
     "url": "https://github.com/jordanholliday/yolotp-next"
   },
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Next utils for Yolotp one-time password auth",
   "files": [
     "dist"
