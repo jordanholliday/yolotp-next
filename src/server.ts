@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
 const sessionOptions = {
-	password: process.env.YOLOTP_PRIVATE_KEY as string,
+	password: process.env.YOLOTP_SECRET_KEY as string,
 	cookieName: "yolotp",
 };
 
@@ -48,7 +48,7 @@ async function POST(req: NextRequest) {
 			},
 			{
 				headers: {
-					"x-api-key": process.env.YOLOTP_PRIVATE_KEY,
+					"x-api-key": process.env.YOLOTP_SECRET_KEY,
 				},
 			},
 		);
@@ -73,7 +73,7 @@ async function POST(req: NextRequest) {
 			{ email: parseGetCode.data.email },
 			{
 				headers: {
-					"x-api-key": process.env.YOLOTP_PRIVATE_KEY,
+					"x-api-key": process.env.YOLOTP_SECRET_KEY,
 				},
 			},
 		);
