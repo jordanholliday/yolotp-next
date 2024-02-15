@@ -3,8 +3,6 @@ import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import z from "zod";
 
-const sessionApiRoute = "/api/auth";
-
 const GetCodeCommand = z.object({
 	email: z.string().email(),
 });
@@ -25,10 +23,10 @@ export enum SessionStatus {
 }
 
 async function fetchJson<JSON = unknown>(
-	input: RequestInfo,
+	url: string,
 	init?: RequestInit,
 ): Promise<JSON> {
-	return fetch(sessionApiRoute, {
+	return fetch(url, {
 		headers: {
 			accept: "application/json",
 			"content-type": "application/json",
@@ -37,12 +35,22 @@ async function fetchJson<JSON = unknown>(
 	}).then((res) => res.json() as JSON);
 }
 
-export function useYolotp() {
+interface UseYolotpProps {
+	apiRoute?: string;
+}
+
+const DEFAULT_PROPS: { apiRoute: NonNullable<UseYolotpProps["apiRoute"]> } = {
+	apiRoute: "/api/auth",
+}
+
+export function useYolotp(props: UseYolotpProps = {}) {
+	const config = { ...DEFAULT_PROPS, ...props };
+
 	const [status, setStatus] = useState<SessionStatus>(
 		SessionStatus.Initializing,
 	);
 	const { data: session, isLoading } = useSWR<{ email?: string }>(
-		sessionApiRoute,
+		config.apiRoute,
 		fetchJson,
 	);
 
@@ -99,14 +107,14 @@ export function useYolotp() {
 	}
 
 	const { trigger: requestCode } = useSWRMutation(
-		sessionApiRoute,
+		config.apiRoute,
 		doRequestCode,
 	);
 	const { trigger: loginWithCode } = useSWRMutation(
-		sessionApiRoute,
+		config.apiRoute,
 		doLoginWithCode,
 	);
-	const { trigger: logout } = useSWRMutation(sessionApiRoute, doLogout);
+	const { trigger: logout } = useSWRMutation(config.apiRoute, doLogout);
 
 	return {
 		isLoading,
