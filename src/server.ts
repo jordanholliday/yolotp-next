@@ -89,4 +89,4 @@ async function DELETE() {
 	return NextResponse.json({ success: true });
 }
 
-export const yolotpApiHandlers = { GET, POST, DELETE };
+export { GET, POST, DELETE };
