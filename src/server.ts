@@ -14,6 +14,13 @@ interface SessionData {
 	loggedIn: boolean;
 }
 
+interface User {
+	id: string;
+	email: string;
+	active: boolean;
+	type: string | null;
+}
+
 async function GET() {
 	const session = await getIronSession<Omit<SessionData, "loggedIn">>(
 		cookies(),
@@ -35,12 +42,20 @@ const CheckCodeCommand = z.object({
 	code: z.string().min(6),
 });
 
+
+type CheckCodeReponse =
+	{ valid: false }
+	| {
+		valid: true;
+		user: User;
+	}
+
 async function POST(req: NextRequest) {
 	const json: unknown = await req.json();
 
 	const parseCheckCode = CheckCodeCommand.safeParse(json);
 	if (parseCheckCode.success) {
-		const res = await axios.post<{ valid: boolean }>(
+		const res = await axios.post<CheckCodeReponse>(
 			"https://yolotp.com/api/check",
 			{
 				email: parseCheckCode.data.email,
@@ -57,11 +72,12 @@ async function POST(req: NextRequest) {
 			return NextResponse.json({ success: false });
 		}
 
-		const session = await getIronSession<{ email: string }>(
+		const session = await getIronSession<{user: User}>(
 			cookies(),
 			sessionOptions,
 		);
-		session.email = parseCheckCode.data.email;
+		session.user = res.data.user;
+
 		await session.save();
 		return NextResponse.json({ success: true });
 	}
