@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
+import type { User } from "./types";
+
 const sessionOptions = {
 	password: process.env.YOLOTP_SECRET_KEY as string,
 	cookieName: "yolotp",
@@ -12,13 +14,6 @@ const sessionOptions = {
 interface SessionData {
 	email?: string;
 	loggedIn: boolean;
-}
-
-interface User {
-	id: string;
-	email: string;
-	active: boolean;
-	type: string | null;
 }
 
 async function GET() {
@@ -47,7 +42,7 @@ type CheckCodeReponse =
 	{ valid: false }
 	| {
 		valid: true;
-		user: User;
+		user: User
 	}
 
 async function POST(req: NextRequest) {
@@ -72,12 +67,11 @@ async function POST(req: NextRequest) {
 			return NextResponse.json({ success: false });
 		}
 
-		const session = await getIronSession<{user: User}>(
+		const session = await getIronSession<{ user: User }>(
 			cookies(),
 			sessionOptions,
 		);
 		session.user = res.data.user;
-
 		await session.save();
 		return NextResponse.json({ success: true });
 	}
