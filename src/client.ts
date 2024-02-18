@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useSWR from "swr";
+import useSWR, { BareFetcher } from "swr";
 import useSWRMutation from "swr/mutation";
 import z from "zod";
 
@@ -47,19 +47,19 @@ const DEFAULT_PROPS: { apiRoute: NonNullable<UseYolotpProps["apiRoute"]> } = {
 
 export function useYolotp(props: UseYolotpProps = {}) {
 	const config = { ...DEFAULT_PROPS, ...props };
+	const [status, setStatus] = useState<SessionStatus>(SessionStatus.Initializing);
 
-	const [status, setStatus] = useState<SessionStatus>(
-		SessionStatus.Initializing,
-	);
-	const { data: session, isLoading } = useSWR<Session>(
-		config.apiRoute,
-		fetchJson,
-	);
-	const { data: userData } = useSWR<{ data?: User }>(
-		`${config.apiRoute}?user=true&trigger=${session?.loggedIn ? "true" : "false"}`,
-		fetchJson,
-	);
+	// fetch session
+	const sessionFetcher: BareFetcher<Session> = () => fetchJson(config.apiRoute);
+	const { data: session, isLoading } = useSWR<Session>(config.apiRoute, sessionFetcher);
 
+	// fetch user
+	const userFetcher: BareFetcher<{ data?: User }> = () => fetchJson(
+		`${config.apiRoute}?user=true&trigger=${session?.loggedIn ? "true" : "false"}`
+	);
+	const { data: userData } = useSWR<{ data?: User }>(config.apiRoute, userFetcher);
+
+	// initialize SessionStatus
 	useEffect(() => {
 		if (status !== SessionStatus.Initializing) return;
 		if (session == null) return; // session is initially null, wait till we have some value
@@ -81,7 +81,6 @@ export function useYolotp(props: UseYolotpProps = {}) {
 			body: JSON.stringify(arg),
 		});
 		setStatus(SessionStatus.LoggedOutCodeNeeded);
-
 		return res;
 	}
 
