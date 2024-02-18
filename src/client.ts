@@ -56,7 +56,7 @@ export function useYolotp(props: UseYolotpProps = {}) {
 		fetchJson,
 	);
 	const { data: userData } = useSWR<{ data?: User }>(
-		`${config.apiRoute}?user=true`,
+		`${config.apiRoute}?user=true?trigger=${session?.loggedIn ? "true" : "false"}`,
 		fetchJson,
 	);
 
