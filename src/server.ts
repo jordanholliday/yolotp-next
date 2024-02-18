@@ -34,7 +34,7 @@ async function GET(req: NextRequest) {
 	}
 
 	const { data } = await axios.get<{ data: User }>(
-		`https://yolotp.com/api/user/${session.userId}`,
+		`https://yolotp.com/api/users/${session.userId}`,
 		{
 			headers: {
 				"x-api-key": process.env.YOLOTP_SECRET_KEY,
