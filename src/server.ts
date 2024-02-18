@@ -4,28 +4,44 @@ import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import z from "zod";
 
-import type { User } from "./types";
+import type { Session, User } from "./types";
 
 const sessionOptions = {
 	password: process.env.YOLOTP_SECRET_KEY as string,
 	cookieName: "yolotp",
 };
 
-interface SessionData {
-	email?: string;
-	loggedIn: boolean;
-}
 
-async function GET() {
-	const session = await getIronSession<Omit<SessionData, "loggedIn">>(
+async function GET(req: NextRequest) {
+	const searchParams = req.nextUrl.searchParams
+	const isUserGET = searchParams.get('user')?.toLowerCase() === "true";
+	const session = await getIronSession<Session>(
 		cookies(),
 		sessionOptions,
 	);
-	const loggedIn = session.email != null;
-	return NextResponse.json({
-		loggedIn,
-		email: session.email,
-	});
+
+	// base case - just return sessions data
+	if (!isUserGET) {
+		return NextResponse.json({
+			userId: session.userId,
+			loggedIn: session.loggedIn ?? false,
+		});
+	}
+
+	// userGET - fetch latest user data and return
+	if (!session.loggedIn || !session.userId) {
+		return NextResponse.json({ data: null, });
+	}
+
+	const { data } = await axios.get<{ data: User }>(
+		`https://yolotp.com/api/user/${session.userId}`,
+		{
+			headers: {
+				"x-api-key": process.env.YOLOTP_SECRET_KEY,
+			},
+		},
+	);
+	return NextResponse.json({ data: data.data });
 }
 
 const GetCodeCommand = z.object({
@@ -67,12 +83,15 @@ async function POST(req: NextRequest) {
 			return NextResponse.json({ success: false });
 		}
 
-		const session = await getIronSession<{ user: User }>(
+		const session = await getIronSession<Session>(
 			cookies(),
 			sessionOptions,
 		);
-		session.user = res.data.user;
+
+		session.userId = res.data.user.id;
+		session.loggedIn = res.data.user != null;
 		await session.save();
+
 		return NextResponse.json({ success: true });
 	}
 

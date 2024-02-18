@@ -4,3 +4,5 @@ export interface User {
 	active: boolean;
 	type: string | null;
 }
+
+export type Session = { loggedIn: boolean, userId: string };

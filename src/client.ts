@@ -3,7 +3,7 @@ import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import z from "zod";
 
-import type { User } from "./types";
+import type { Session, User } from "./types";
 
 const GetCodeCommand = z.object({
 	email: z.string().email(),
@@ -51,8 +51,12 @@ export function useYolotp(props: UseYolotpProps = {}) {
 	const [status, setStatus] = useState<SessionStatus>(
 		SessionStatus.Initializing,
 	);
-	const { data: session, isLoading } = useSWR<{ user?: User }>(
+	const { data: session, isLoading } = useSWR<Session>(
 		config.apiRoute,
+		fetchJson,
+	);
+	const { data: userData } = useSWR<{ data?: User }>(
+		`${config.apiRoute}?user=true`,
 		fetchJson,
 	);
 
@@ -61,7 +65,7 @@ export function useYolotp(props: UseYolotpProps = {}) {
 		if (session == null) return; // session is initially null, wait till we have some value
 
 		setStatus(
-			session?.user != null
+			session?.userId != null
 				? SessionStatus.LoggedIn
 				: SessionStatus.LoggedOutEmailNeeded,
 		);
@@ -124,6 +128,7 @@ export function useYolotp(props: UseYolotpProps = {}) {
 		logout,
 		requestCode,
 		session,
+		user: userData?.data,
 		status,
 	};
 }
