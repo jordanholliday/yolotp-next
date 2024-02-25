@@ -116,14 +116,9 @@ async function getSession() {
 
 interface GetMiddlewareProps {
 	redirectPath: string;
-	matcher: string | string[];
 }
 
 function getMiddleware(props: GetMiddlewareProps) {
-	if (typeof props?.matcher !== "string") {
-		throw new Error("You must pass a `matcher` to `getMiddleware`.")
-	}
-
 	if (typeof props?.redirectPath !== "string") {
 		throw new Error("You must pass a `redirectPath` to `getMiddleware`.")
 	}
@@ -135,9 +130,7 @@ function getMiddleware(props: GetMiddlewareProps) {
 		}
 	}
 
-	const config = { matcher: props.matcher };
-
-	return { config, middleware };
+	return { middleware };
 }
 
 export {
