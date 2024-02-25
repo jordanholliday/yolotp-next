@@ -15,10 +15,7 @@ const sessionOptions = {
 async function GET(req: NextRequest) {
 	const searchParams = req.nextUrl.searchParams
 	const isUserGET = searchParams.get('user')?.toLowerCase() === "true";
-	const session = await getIronSession<Session>(
-		cookies(),
-		sessionOptions,
-	);
+	const session = await getSession();
 
 	// base case - just return sessions data
 	if (!isUserGET) {
@@ -48,8 +45,7 @@ const GetCodeCommand = z.object({
 	email: z.string().email(),
 });
 
-const CheckCodeCommand = z.object({
-	email: z.string().email(),
+const CheckCodeCommand = GetCodeCommand.extend({
 	code: z.string().min(6),
 });
 
@@ -83,11 +79,7 @@ async function POST(req: NextRequest) {
 			return NextResponse.json({ success: false });
 		}
 
-		const session = await getIronSession<Session>(
-			cookies(),
-			sessionOptions,
-		);
-
+		const session = await getSession();
 		session.userId = res.data.user.id;
 		session.loggedIn = res.data.user != null;
 		await session.save();
@@ -113,9 +105,45 @@ async function POST(req: NextRequest) {
 }
 
 async function DELETE() {
-	const session = await getIronSession(cookies(), sessionOptions);
+	const session = await getSession();
 	session.destroy();
 	return NextResponse.json({ success: true });
 }
 
-export { GET, POST, DELETE };
+async function getSession() {
+	return getIronSession<Session>(cookies(), sessionOptions);
+}
+
+interface GetMiddlewareProps {
+	redirectPath: string;
+	matcher: string | string[];
+}
+
+function getMiddleware(props: GetMiddlewareProps) {
+	if (typeof props?.matcher !== "string") {
+		throw new Error("You must pass a `matcher` to `getMiddleware`.")
+	}
+
+	if (typeof props?.redirectPath !== "string") {
+		throw new Error("You must pass a `redirectPath` to `getMiddleware`.")
+	}
+
+	async function middleware(request: NextRequest) {
+		const session = await getSession();
+		if (!session.loggedIn) {
+			return Response.redirect(`${request.nextUrl.origin}${props.redirectPath}`, 302);
+		}
+	}
+
+	const config = { matcher: props.matcher };
+
+	return { config, middleware };
+}
+
+export {
+	GET,
+	POST,
+	DELETE,
+	getSession,
+	getMiddleware,
+};

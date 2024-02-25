@@ -51,13 +51,13 @@ export function useYolotp(props: UseYolotpProps = {}) {
 
 	// fetch session
 	const sessionFetcher: BareFetcher<Session> = () => fetchJson(config.apiRoute);
-	const { data: session, isLoading } = useSWR<Session>(config.apiRoute, sessionFetcher);
+	const { data: session } = useSWR<Session>(config.apiRoute, sessionFetcher);
 
 	// fetch user
 	const userFetcher: BareFetcher<{ data?: User }> = () => fetchJson(
 		`${config.apiRoute}?user=true&trigger=${session?.loggedIn ? "true" : "false"}`
 	);
-	const { data: userData } = useSWR<{ data?: User }>(config.apiRoute, userFetcher);
+	const { data: userData, isLoading: userDataIsLoading } = useSWR<{ data?: User }>(config.apiRoute, userFetcher);
 
 	// initialize SessionStatus
 	useEffect(() => {
@@ -122,12 +122,11 @@ export function useYolotp(props: UseYolotpProps = {}) {
 	const { trigger: logout } = useSWRMutation(config.apiRoute, doLogout);
 
 	return {
-		isLoading,
 		loginWithCode,
 		logout,
 		requestCode,
-		session,
 		user: userData?.data,
+		userIsLoading: userDataIsLoading,
 		status,
 	};
 }
