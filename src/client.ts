@@ -54,10 +54,9 @@ export function useYolotp(props: UseYolotpProps = {}) {
 	const { data: session } = useSWR<Session>(config.apiRoute, sessionFetcher);
 
 	// fetch user
-	const userFetcher: BareFetcher<{ data?: User }> = () => fetchJson(
-		`${config.apiRoute}?user=true&trigger=${session?.loggedIn ? "true" : "false"}`
-	);
-	const { data: userData, isLoading: userDataIsLoading } = useSWR<{ data?: User }>(config.apiRoute, userFetcher);
+	const userRoute = `${config.apiRoute}?user=true&trigger=${session?.loggedIn ? "true" : "false"}`;
+	const userFetcher: BareFetcher<{ data?: User }> = () => fetchJson(userRoute);
+	const { data: userData, isLoading: userDataIsLoading } = useSWR<{ data?: User }>(userRoute, userFetcher);
 
 	// initialize SessionStatus
 	useEffect(() => {
