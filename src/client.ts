@@ -124,7 +124,7 @@ export function useYolotp(props: UseYolotpProps = {}) {
 		loginWithCode,
 		logout,
 		requestCode,
-		user: userData?.data,
+		user: status === SessionStatus.LoggedIn ? userData?.data : null,
 		userIsLoading: userDataIsLoading,
 		status,
 	};
