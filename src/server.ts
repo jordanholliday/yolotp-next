@@ -35,7 +35,7 @@ async function GET(req: NextRequest) {
 		{
 			headers: {
 				"x-api-key": process.env.YOLOTP_SECRET_KEY,
-				"x-client-ip": req.ip,
+				"x-client-ip": req.ip ?? req.headers.get('X-Forwarded-For'),
 			},
 		},
 	);
