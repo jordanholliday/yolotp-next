@@ -35,6 +35,7 @@ async function GET(req: NextRequest) {
 		{
 			headers: {
 				"x-api-key": process.env.YOLOTP_SECRET_KEY,
+				"x-client-ip": req.ip,
 			},
 		},
 	);
@@ -71,6 +72,7 @@ async function POST(req: NextRequest) {
 			{
 				headers: {
 					"x-api-key": process.env.YOLOTP_SECRET_KEY,
+					"x-client-ip": req.ip,
 				},
 			},
 		);
