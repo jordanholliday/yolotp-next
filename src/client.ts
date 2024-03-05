@@ -5,6 +5,7 @@ import z from "zod";
 
 import type { Session, User } from "./types";
 
+
 const GetCodeCommand = z.object({
 	email: z.string().email(),
 });
@@ -129,3 +130,5 @@ export function useYolotp(props: UseYolotpProps = {}) {
 		status,
 	};
 }
+
+export type { Session, User } from "./types";
