@@ -145,4 +145,7 @@ export {
 	DELETE,
 	getSession,
 	getMiddleware,
+	Session,
+	User,
 };
+
