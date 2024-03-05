@@ -84,6 +84,9 @@ async function POST(req: NextRequest) {
 		const session = await getSession();
 		session.userId = res.data.user.id;
 		session.loggedIn = res.data.user != null;
+		session.cache = {
+			user: res.data.user ?? null,
+		};
 		await session.save();
 
 		return NextResponse.json({ success: true });

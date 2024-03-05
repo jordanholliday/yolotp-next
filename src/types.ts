@@ -5,4 +5,10 @@ export interface User {
 	type: string | null;
 }
 
-export type Session = { loggedIn: boolean, userId: string };
+export type Session = {
+	loggedIn: boolean;
+	userId: string;
+	cache: {
+		user: User | null;
+	}
+};
